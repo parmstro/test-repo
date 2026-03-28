@@ -1,0 +1,6 @@
+*.vscode
+*.tar
+*/example.ca/vault/*.yml
+*/files/.*
+.ansible
+example.ca/vault/rhis_builder_vault.yml
