@@ -1,0 +1,128 @@
+---
+
+name: Managed Inventory Sync
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      delay_minutes:
+        description: 'Minutes to wait before launching tests'
+        required: false
+        default: '0'
+      source_dir:
+        description: 'Override Source Directory'
+        default: 'deployments/example.ca' # Falls back to this if you leave it blank
+      target_repo:
+        description: 'Override Target Repository'
+        default: 'parmstro/rhis-builder-example.ca'
+
+jobs:
+  # PHASE 1: PREPARATION
+  prep:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tagger.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: inventory-repo
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        id: tagger
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
+
+      - name: Slack "Test Launch Waiting for Approval" Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: "#FFCC00" # Warning Yellow
+          SLACK_TITLE: "⏳ Test Launch Approval Required: ${{ steps.tagger.outputs.new_tag }}"
+          SLACK_MESSAGE: |
+            A new inventory update is ready for deep validation in the Data Center.
+            *Version:* ${{ steps.tagger.outputs.new_tag }}
+            *Action:* Please approve the deployment to start the expensive test suite.
+            *Approval Link:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_USERNAME: "DC Gatekeeper"
+
+  # PHASE 2: CONTROLLED TESTING (Expensive)
+  expensive-test:
+    needs: prep
+    runs-on: ubuntu-latest
+    environment: testing-gate  # Manual Approval Gate
+    steps:
+      - name: Implement Time Delay
+        if: github.event.inputs.delay_minutes > 0
+        run: |
+          echo "Waiting for ${{ github.event.inputs.delay_minutes }} minutes..."
+          sleep $(( ${{ github.event.inputs.delay_minutes }} * 60 ))
+
+      - name: Checkout Inventory
+        uses: actions/checkout@v4
+        with:
+          path: inventory-repo
+
+      - name: Run Expensive Test Suite
+        id: tester
+        run: |
+          chmod +x ${{ vars.TEST_SCRIPT }}
+          if ./${{ vars.TEST_SCRIPT }}; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  # PHASE 3: SYNC & MERGE
+  sync-and-merge:
+    needs: [prep, expensive-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Target Repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.TARGET_REPO }}
+          path: target-repo
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Sync Files
+        run: cp -R inventory-repo/${{ vars.SOURCE_DIR }}/* target-repo/
+
+      - name: Create and Merge PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: target-repo
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "Update to ${{ needs.prep.outputs.new_tag }}"
+          branch: sync-${{ needs.prep.outputs.new_tag }}
+          title: "Inventory Update: ${{ needs.prep.outputs.new_tag }}"
+          base: main
+
+      - name: Auto-Approve and Merge
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh pr review ${{ steps.cpr.outputs.pull-request-number }} --approve --repo ${{ vars.TARGET_REPO }}
+          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --merge --auto --repo ${{ vars.TARGET_REPO }}
+
+      - name: Slack Notification
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
+          SLACK_TITLE: "Inventory Sync: ${{ needs.prep.outputs.new_tag }}"
+          SLACK_MESSAGE: |
+            *Status:* ${{ job.status }}
+            *Action Required:* Approval granted for ${{ needs.prep.outputs.new_tag }}
+            *PR:* ${{ steps.cpr.outputs.pull-request-url || 'N/A' }}
+
+...
