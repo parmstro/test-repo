@@ -2,7 +2,7 @@
 
 # --- CONFIGURATION ---
 SOURCE_DIR="inventory-repo/deployments/example.ca" # Should match your GitHub Variable
-REQUIRED_FILES=("vault/rhis_builder_vault.yml") # Example files
+REQUIRED_FILES=("vault_SAMPLE/rhis_builder_vault_SAMPLE.yml") # Example files
 
 echo "--- [1/3] Pre-Flight Checks ---"
 if [ ! -d "$SOURCE_DIR" ]; then
