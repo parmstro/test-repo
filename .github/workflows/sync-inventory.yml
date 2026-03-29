@@ -41,17 +41,19 @@ jobs:
           DEFAULT_BUMP: patch
 
       - name: Slack "Test Launch Waiting for Approval" Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_COLOR: "#FFCC00"
-          SLACK_TITLE: "⏳ Test Launch Approval Required: ${{ steps.tagger.outputs.new_tag }}"
-          SLACK_MESSAGE: |
+        uses: archive/github-actions-slack@v2.0.0
+        id: notify
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: ${{ vars.SLACK_CHANNEL_ID }}
+          slack-optional-color: "#FFCC00"
+          slack-optional-title: "⏳ Test Launch Approval Required: ${{ steps.tagger.outputs.new_tag }}"
+          slack-text: |
             A new inventory update is ready for deep validation in the Data Center.
             *Version:* ${{ steps.tagger.outputs.new_tag }}
             *Action:* Please approve the deployment to start the expensive test suite.
             *Approval Link:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          SLACK_USERNAME: "DC Gatekeeper"
+
 
   # PHASE 2: CONTROLLED TESTING (Expensive)
   expensive-test:
