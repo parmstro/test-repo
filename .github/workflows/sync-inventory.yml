@@ -13,7 +13,7 @@ on:
         default: '0'
       source_dir:
         description: 'Override Source Directory'
-        default: 'deployments/example.ca' # Falls back to this if you leave it blank
+        default: 'deployments/example.ca'
       target_repo:
         description: 'Override Target Repository'
         default: 'parmstro/rhis-builder-example.ca'
@@ -28,14 +28,12 @@ jobs:
       - uses: actions/checkout@v6
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          path: main
           fetch-depth: 0
 
       - name: Bump version and push tag
         id: tagger
         uses: anothrNick/github-tag-action@1.67.0
         env:
-          GIT_DISCOVERY_ACROSS_FILESYSTEM: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_PREFIX: v
           DEFAULT_BUMP: patch
@@ -44,7 +42,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_COLOR: "#FFCC00" # Warning Yellow
+          SLACK_COLOR: "#FFCC00"
           SLACK_TITLE: "⏳ Test Launch Approval Required: ${{ steps.tagger.outputs.new_tag }}"
           SLACK_MESSAGE: |
             A new inventory update is ready for deep validation in the Data Center.
@@ -57,7 +55,7 @@ jobs:
   expensive-test:
     needs: prep
     runs-on: ubuntu-latest
-    environment: testing-gate  # Manual Approval Gate
+    environment: testing-gate
     steps:
       - name: Implement Time Delay
         if: github.event.inputs.delay_minutes > 0
@@ -66,7 +64,7 @@ jobs:
           sleep $(( ${{ github.event.inputs.delay_minutes }} * 60 ))
 
       - name: Checkout Inventory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: inventory-repo
 
@@ -86,14 +84,22 @@ jobs:
     needs: [prep, expensive-test]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Current Repo
+        uses: actions/checkout@v6
+        with:
+          path: source-repo
+
       - name: Checkout Target Repo
         uses: actions/checkout@v6
         with:
           repository: ${{ vars.TARGET_REPO }}
           token: ${{ secrets.PAT_TOKEN }}
+          path: target-repo
 
       - name: Sync Files
-        run: cp -R inventory-repo/${{ vars.SOURCE_DIR }}/* target-repo/
+        run: |
+          mkdir -p target-repo/${{ vars.SOURCE_DIR }}
+          cp -R source-repo/${{ vars.SOURCE_DIR }}/* target-repo/${{ vars.SOURCE_DIR }}/
 
       - name: Create and Merge PR
         id: cpr
@@ -125,5 +131,3 @@ jobs:
             *Status:* ${{ job.status }}
             *Action Required:* Approval granted for ${{ needs.prep.outputs.new_tag }}
             *PR:* ${{ steps.cpr.outputs.pull-request-url || 'N/A' }}
-
-...
