@@ -83,6 +83,8 @@ jobs:
   sync-and-merge:
     needs: [prep, expensive-test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Current Repo
         uses: actions/checkout@v6
