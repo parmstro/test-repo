@@ -120,8 +120,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          gh pr create ${{ steps.cpr.outputs.pull-request-number }} --repo ${{ vars.TARGET_REPO }}
-        #  gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --auto --repo ${{ vars.TARGET_REPO }}
+          gh pr review ${{ steps.cpr.outputs.pull-request-number }} --repo ${{ vars.TARGET_REPO }}
+          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --auto --repo ${{ vars.TARGET_REPO }}
 
       - name: Slack Notification
         if: always()
