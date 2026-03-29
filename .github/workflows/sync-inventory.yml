@@ -77,8 +77,8 @@ jobs:
       - name: Run Expensive Test Suite
         id: tester
         run: |
-          chmod +x ${{ vars.TEST_SCRIPT }}
-          if ./${{ vars.TEST_SCRIPT }}; then
+          chmod +x inventory-repo/${{ vars.TEST_SCRIPT }}
+          if ./inventory-repo/${{ vars.TEST_SCRIPT }}; then
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
