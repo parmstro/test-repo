@@ -26,9 +26,13 @@
         var: setup_result
       # This task uses the facts gathered in the previous step
 
+    - name: Define the deployment directory for this configuration
+      ansible.builtin.set_fact:
+        rhis_deployment_directory: "deployments/{{ global_domain_name }}"
+
     - name: "Create rhis-builder-inventory configuration directory for {{ global_domain_name }}"
       ansible.builtin.file:
-        path: "{{ global_domain_name }}"
+        path: "{{ rhis_deployment_directory }}"
         state: directory
         mode: "0755"
 
@@ -85,7 +89,7 @@
     - name: Sync directory with rsync (excluding jinja templates)
       ansible.posix.synchronize:
         src: ./inventory_template/
-        dest: "./{{ global_domain_name }}/"
+        dest: "./{{ rhis_deployment_directory }}/"
         delete: true # Remove files in dest not in src
         recursive: true
         rsync_opts:
@@ -95,7 +99,7 @@
     - name: Copy jinja templates as-is without templating
       ansible.builtin.copy:
         src: "{{ item }}"
-        dest: "{{ global_domain_name }}/templates"
+        dest: "{{ rhis_deployment_directory }}/templates"
         mode: "0755"
         remote_src: true
       loop: "{{ lookup('fileglob', 'inventory_template/templates/*.j2').split(',') }}"
@@ -112,7 +116,7 @@
 
     - name: "Create host_vars directory"
       ansible.builtin.file:
-        path: "{{ global_domain_name }}/host_vars"
+        path: "{{ rhis_deployment_directory }}/host_vars"
         state: directory
         mode: "0755"
 
@@ -137,7 +141,7 @@
     - name: Populate config files from jinja templates - part one
       ansible.builtin.template:
         src: "{{ item }}"
-        dest: "./{{ global_domain_name }}{{ item | ansible.builtin.regex_replace('inventory_template', '') | ansible.builtin.regex_replace('.j2', '') }}"
+        dest: "./{{ rhis_deployment_directory }}{{ item | ansible.builtin.regex_replace('inventory_template', '') | ansible.builtin.regex_replace('.j2', '') }}"
         mode: "0755"
       loop: "{{ jinja_template_paths_1.files | map(attribute='path') | list }}"
 
@@ -150,7 +154,7 @@
 
     - name: Find and register paths to group_vars platform_installer FQD files
       ansible.builtin.find:
-        paths: "{{ global_domain_name }}/group_vars/platform_installer"
+        paths: "{{ rhis_deployment_directory }}/group_vars/platform_installer"
         file_type: file
       register: group_vars_platform_installer_paths
 

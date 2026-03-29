@@ -115,6 +115,14 @@ jobs:
           title: "Inventory Update: ${{ needs.prep.outputs.new_tag }}"
           base: main
 
+      # - name: Auto-Approve and Merge
+      #   if: steps.cpr.outputs.pull-request-number
+      #   env:
+      #     GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      #   run: |
+      #     gh pr review ${{ steps.cpr.outputs.pull-request-number }} --approve --repo ${{ vars.TARGET_REPO }}
+      #     gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --merge --auto --repo ${{ vars.TARGET_REPO }}
+
       - name: Slack Notification
         if: always()
         uses: slackapi/slack-github-action@v3.0.1

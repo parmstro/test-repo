@@ -1,7 +1,7 @@
 ---
 - name: "Create {{ system_info.key }}{{ item | int + 1 }}.{{ global_domain_name }} host_vars directory"
   ansible.builtin.file:
-    path: "{{ global_domain_name }}/host_vars/{{ system_info.key }}{{ item | int + 1 }}.{{ global_domain_name }}"
+    path: "{{ rhis_deployment_directory }}/host_vars/{{ system_info.key }}{{ item | int + 1 }}.{{ global_domain_name }}"
     state: directory
     mode: "0755"
   loop: "{{ range(0, system_info.value | int) | list }}"
@@ -13,7 +13,7 @@
   #     - "{{ system_info.key | regex_replace('^(.{3}).*$', '\\1') }}"
   ansible.posix.synchronize:
     src: "inventory_template/host_vars/{{ system_info.key }}{{ rhis_aap_release_version_concat }}/"
-    dest: "./{{ global_domain_name }}/host_vars/{{ system_info.key }}{{ item | int + 1 }}.{{ global_domain_name }}/"
+    dest: "./{{ rhis_deployment_directory }}/host_vars/{{ system_info.key }}{{ item | int + 1 }}.{{ global_domain_name }}/"
     delete: true # Remove files in dest not in src
     recursive: true
     rsync_opts:
