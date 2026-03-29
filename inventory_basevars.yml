@@ -9,11 +9,11 @@
 # GLOBAL VARIABLES THAT APPLY TO ALL HOSTS
 global_domain_name: "example.ca"
 
-default_network: "192.168.140.0"
+default_network: "192.168.148.0"
 default_network_prefix: "22"
 default_network_mask: "255.255.252.0"
 
-default_bond_network: "192.168.142.0"
+default_bond_network: "192.168.152.0"
 default_bond_network_prefix: "22"
 default_bond_network_mask: "255.255.252.0"
 

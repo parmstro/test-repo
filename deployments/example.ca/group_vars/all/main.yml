@@ -3,11 +3,11 @@
 # GLOBAL VARIABLES THAT APPLY TO ALL HOSTS
 _global_domain_name: "example.ca"
 
-_default_network: "192.168.140"
+_default_network: "192.168.148"
 _default_network_prefix: "22"
 _default_network_mask: "255.255.252.0"
 
-_default_bond_network: "192.168.142"
+_default_bond_network: "192.168.152"
 _default_bond_network_prefix: "22"
 _default_bond_network_mask: "255.255.252.0"
 
@@ -85,7 +85,7 @@ ipareplica_domain: "{{ _global_domain_name }}"
 
 
 # ipaclient role variables used in multiple repos
-ipa_client_dns_servers: "192.168.140.10"
+ipa_client_dns_servers: "192.168.148.10"
 ipaclient_dns_servers: "{{ ipa_client_dns_servers }}"
 
 ipa_client_domain: "{{ _global_domain_name }}"
