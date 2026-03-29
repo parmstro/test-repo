@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # --- CONFIGURATION ---
-SOURCE_DIR="./deployments/example.ca" # Should match your GitHub Variable
-REQUIRED_FILES=("./vault/rhis_builder_vault.yml") # Example files
+SOURCE_DIR="inventory-repo/deployments/example.ca" # Should match your GitHub Variable
+REQUIRED_FILES=("vault/rhis_builder_vault.yml") # Example files
 
 echo "--- [1/3] Pre-Flight Checks ---"
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -22,7 +22,7 @@ echo "Pre-flight passed. Starting expensive validation..."
 # --- [2/3] THE EXPENSIVE TEST LOGIC ---
 # Replace the 'sleep 5' with your actual heavy processing command
 # e.g., docker run --rm my-heavy-validator or python3 complex_check.py
-echo "Running deep structural analysis (this may take a while)..."
+echo "Running rhis-builder build of EXAMPLE.CA for analysis (this may take a while)..."
 sleep 5 
 
 # PASS
