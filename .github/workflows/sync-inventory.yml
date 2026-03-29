@@ -22,6 +22,8 @@ jobs:
   # PHASE 1: PREPARATION
   prep:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       new_tag: ${{ steps.tagger.outputs.new_tag }}
     steps:
@@ -131,3 +133,4 @@ jobs:
             *Status:* ${{ job.status }}
             *Action Required:* Approval granted for ${{ needs.prep.outputs.new_tag }}
             *PR:* ${{ steps.cpr.outputs.pull-request-url || 'N/A' }}
+...
