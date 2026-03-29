@@ -13,7 +13,7 @@ on:
         default: '0'
       source_dir:
         description: 'Override Source Directory'
-        default: 'deployments/example.ca'
+        default: '${{ vars.SOURCE_DIR }}'
       target_repo:
         description: 'Override Target Repository'
         default: 'parmstro/rhis-builder-example.ca'
@@ -104,8 +104,8 @@ jobs:
 
       - name: Sync Files
         run: |
-          mkdir -p target-repo/${{ vars.SOURCE_DIR }}
-          cp -R source-repo/${{ vars.SOURCE_DIR }}/* target-repo/${{ vars.SOURCE_DIR }}/
+          mkdir -p target-repo/source_dir
+          cp -R inventory-repo/source_dir/* target-repo/source_dir/
 
       - name: Create and Merge PR
         id: cpr
