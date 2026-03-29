@@ -25,9 +25,10 @@ jobs:
     outputs:
       new_tag: ${{ steps.tagger.outputs.new_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
-          path: ${{ inputs.source_dir }}
+          token: ${{ secrets.PAT_TOKEN }}
+          path: main
           fetch-depth: 0
 
       - name: Bump version and push tag
@@ -85,10 +86,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Target Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ vars.TARGET_REPO }}
-          path: target-repo
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Sync Files
