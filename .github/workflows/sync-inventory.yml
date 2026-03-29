@@ -101,8 +101,8 @@ jobs:
 
       - name: Sync Files
         run: |
-          mkdir -p target-repo/deployments/example.ca
-          cp -R source-repo/deployments/example.ca target-repo/deployments/example.ca
+          mkdir -p target-repo/deployments/
+          cp -R source-repo/deployments/example.ca target-repo/deployments/
 
       - name: Create and Merge PR
         id: cpr
