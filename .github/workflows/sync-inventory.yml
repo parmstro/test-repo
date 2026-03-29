@@ -85,6 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout Current Repo
         uses: actions/checkout@v6
