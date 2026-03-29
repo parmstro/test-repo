@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: inventory-repo
+          path: parmstro/test-repo
           fetch-depth: 0
 
       - name: Bump version and push tag
