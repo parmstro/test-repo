@@ -44,16 +44,17 @@ jobs:
         uses: slackapi/slack-github-action@v3.0.1
         id: notify
         with:
-          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
-          slack-channel: ${{ vars.SLACK_CHANNEL_ID }}
-          slack-optional-color: "#FFCC00"
-          slack-optional-title: "⏳ Test Launch Approval Required: ${{ steps.tagger.outputs.new_tag }}"
-          slack-optional-unfurl-links: false
-          slack-text: |
-            rhis-build-inventory templates have been updated and required a build test.
-            *Version:* ${{ steps.tagger.outputs.new_tag }}
-            *Action:* APPROVE/DENY - Deployment approval is required to run this test.
-            *Approval Link:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            unfurl_links: false
+            title: "⏳ Test Launch Approval Required: ${{ steps.tagger.outputs.new_tag }}"
+            text: |
+              rhis-build-inventory templates have been updated and required a build test.
+              *Version:* ${{ steps.tagger.outputs.new_tag }}
+              *Action:* APPROVE/DENY - Deployment approval is required to run this test.
+              *Approval Link:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
 
   # PHASE 2: CONTROLLED TESTING (Expensive)
@@ -130,15 +131,16 @@ jobs:
         uses: slackapi/slack-github-action@v3.0.1
         id: notify
         with:
-          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
-          slack-channel: ${{ vars.SLACK_CHANNEL_ID }}
-          slack-optional-color: ${{ job.status == 'success' && 'good' || 'danger' }}
-          slack-optional-title: "Inventory Sync: ${{ needs.prep.outputs.new_tag }}"
-          slack-optional-unfurl-links: false
-          slack-text: |
-            *Event:* "${{ github.event_name }}" in "${{ github.repository }}" 🤓
-            *Status:* ${{ job.status }}
-            *Action Required:* Approval granted for ${{ needs.prep.outputs.new_tag }}
-            *PR:* ${{ steps.cpr.outputs.pull-request-url || 'N/A' }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            unfurl_links: false
+            title: "Inventory Sync: ${{ needs.prep.outputs.new_tag }}"
+            text: |
+              *Event:* "${{ github.event_name }}" in "${{ github.repository }}" 🤓
+              *Status:* ${{ job.status }}
+              *Action Required:* APPROVE/DENY - Approval required for ${{ needs.prep.outputs.new_tag }}
+              *PR:* ${{ steps.cpr.outputs.pull-request-url || 'N/A' }}
 
 ...
