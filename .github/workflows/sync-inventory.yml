@@ -45,9 +45,9 @@ jobs:
             unfurl_links: false
             title: "⏳ Test Launch Approval Required: ${{ steps.tagger.outputs.new_tag }}"
             text: |
-              rhis-build-inventory templates have been updated and required a build test.
+              rhis-build-inventory templates have been updated and new example.ca configuration created.
               *Version:* ${{ steps.tagger.outputs.new_tag }}
-              *Action:* APPROVE/DENY - Deployment approval is required to run this test.
+              *Action:* APPROVE/DENY - Deployment approval is required to run a rebuild test.
               *Approval Link:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
 
@@ -99,7 +99,7 @@ jobs:
       - name: Sync Files
         run: |
           mkdir -p target-repo/deployments/example.ca
-          cp -R inventory-repo/deployments/example.ca target-repo/deployments/example.ca
+          cp -R source-repo/deployments/example.ca target-repo/deployments/example.ca
 
       - name: Create and Merge PR
         id: cpr
