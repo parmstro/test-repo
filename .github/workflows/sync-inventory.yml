@@ -11,12 +11,6 @@ on:
         description: 'Minutes to wait before launching tests'
         required: false
         default: '0'
-      source_dir:
-        description: 'Override Source Directory'
-        default: 'deployments/example.ca'
-      target_repo:
-        description: 'Override Target Repository'
-        default: 'parmstro/rhis-builder-example.ca'
 
 jobs:
   # PHASE 1: PREPARATION
@@ -104,8 +98,8 @@ jobs:
 
       - name: Sync Files
         run: |
-          mkdir -p target-repo/source_dir
-          cp -R inventory-repo/source_dir/* target-repo/source_dir/
+          mkdir -p target-repo/deployments/example.ca
+          cp -R inventory-repo/deployments/example.ca/* target-repo/deployments/example.ca
 
       - name: Create and Merge PR
         id: cpr
