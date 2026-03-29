@@ -124,13 +124,16 @@ jobs:
 
       - name: Slack Notification
         if: always()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
-          SLACK_TITLE: "Inventory Sync: ${{ needs.prep.outputs.new_tag }}"
-          SLACK_MESSAGE: |
+        uses: archive/github-actions-slack@v2.0.0
+        id: notify
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: ${{ vars.SLACK_CHANNEL_ID }}
+          slack-text: |
+            *Event:* "${{ github.event_name }}" in "${{ github.repository }}" 🤓
             *Status:* ${{ job.status }}
             *Action Required:* Approval granted for ${{ needs.prep.outputs.new_tag }}
             *PR:* ${{ steps.cpr.outputs.pull-request-url || 'N/A' }}
+          slack-optional-color: ${{ job.status == 'success' && 'good' || 'danger' }}
+          slack-optional-title: "Inventory Sync: ${{ needs.prep.outputs.new_tag }}"
 ...
